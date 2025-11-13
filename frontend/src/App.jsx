@@ -285,7 +285,6 @@ function App() {
                 </div>
               )}
               
-              {/* CRITICAL FIX: This shows the actual dashboards */}
               {userType === 'user' ? 
                 <UserDashboard 
                   contract={creditContract} 
