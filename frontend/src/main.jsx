@@ -1,7 +1,7 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './index.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App.jsx';
+import './index.css';
 
 console.log('🚀 FHE CreditGuard starting...');
 
@@ -17,33 +17,26 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('App crashed:', error, errorInfo);
+    console.error('App Error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
       return (
-        <div style={{ 
-          padding: '2rem', 
-          textAlign: 'center', 
+        <div style={{
+          padding: '2rem',
+          textAlign: 'center',
           background: '#1a1a1a',
           color: 'white',
           minHeight: '100vh',
-          fontFamily: 'Arial, sans-serif'
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}>
-          <h1 style={{ color: '#FF6B6B' }}>⚠️ Application Error</h1>
-          <p>The application crashed. Check the browser console for details.</p>
-          <p style={{ 
-            background: '#2a2a2a', 
-            padding: '1rem', 
-            borderRadius: '8px',
-            margin: '1rem 0',
-            fontFamily: 'monospace',
-            fontSize: '0.875rem'
-          }}>
-            Error: {this.state.error?.message}
-          </p>
-          <button 
+          <h1 style={{ color: '#FF6B6B', marginBottom: '1rem' }}>⚠️ Application Error</h1>
+          <p style={{ marginBottom: '1rem' }}>Something went wrong. Check the console for details.</p>
+          <button
             onClick={() => window.location.reload()}
             style={{
               background: '#FFD700',
@@ -65,30 +58,58 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// Get root element
+const rootElement = document.getElementById('root');
 
-try {
-  root.render(
-    <React.StrictMode>
-      <ErrorBoundary>
-        <App />
-      </ErrorBoundary>
-    </React.StrictMode>
-  );
-  console.log('✅ React app rendered successfully');
-} catch (error) {
-  console.error('❌ Failed to render React app:', error);
-  // Fallback rendering
-  root.render(
-    <div style={{ 
-      padding: '2rem', 
-      textAlign: 'center', 
-      background: '#1a1a1a',
-      color: 'white',
-      minHeight: '100vh'
-    }}>
-      <h1>FHE CreditGuard</h1>
-      <p>Failed to load application. Please check the console.</p>
+if (!rootElement) {
+  console.error('❌ Root element not found!');
+  document.body.innerHTML = `
+    <div style="padding: 2rem; text-align: center; background: #1a1a1a; color: white; min-height: 100vh;">
+      <h1 style="color: #FF6B6B;">Error: Root element not found</h1>
+      <p>Cannot find the root element to mount React app.</p>
     </div>
-  );
+  `;
+} else {
+  try {
+    const root = ReactDOM.createRoot(rootElement);
+    
+    root.render(
+      <React.StrictMode>
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
+      </React.StrictMode>
+    );
+    
+    console.log('✅ React app rendered successfully');
+    
+    // Hide loading screen
+    setTimeout(() => {
+      const loadingElement = document.getElementById('initial-loading');
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+    }, 500);
+    
+  } catch (error) {
+    console.error('❌ Failed to render React app:', error);
+    
+    // Fallback UI
+    rootElement.innerHTML = `
+      <div style="padding: 2rem; text-align: center; background: #1a1a1a; color: white; min-height: 100vh;">
+        <h1 style="color: #FF6B6B;">FHE CreditGuard</h1>
+        <p>Failed to initialize application. Please refresh the page.</p>
+        <button onclick="window.location.reload()" style="
+          background: #FFD700;
+          color: #000000;
+          border: none;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          font-weight: bold;
+          margin-top: 1rem;
+        ">Refresh Page</button>
+      </div>
+    `;
+  }
 }
