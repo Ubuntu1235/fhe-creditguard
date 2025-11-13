@@ -1,25 +1,60 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ethers } from 'ethers';
 import Header from './components/Header';
 import UserDashboard from './components/UserDashboard';
 import LenderDashboard from './components/LenderDashboard';
+import Marketplace from './components/Marketplace';
 import './App.css';
 
-const APP_NAME = 'FHE CreditGuard';
+// Import contract addresses and ABIs
+import { CREDIT_SCORING_ABI, MARKETPLACE_ABI } from './contracts/abi';
+import { CREDIT_SCORING_ADDRESS, MARKETPLACE_ADDRESS } from './contract-addresses';
+
+// Environment variables
+const APP_NAME = import.meta.env.VITE_APP_NAME || 'FHE CreditGuard';
+const APP_DESCRIPTION = import.meta.env.VITE_APP_DESCRIPTION || 'Confidential Credit Scoring Protocol';
 
 function App() {
   const [account, setAccount] = useState('');
+  const [creditContract, setCreditContract] = useState(null);
+  const [marketplaceContract, setMarketplaceContract] = useState(null);
   const [userType, setUserType] = useState('user');
   const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [network, setNetwork] = useState('');
+
+  useEffect(() => {
+    checkWalletConnection();
+  }, []);
+
+  const checkWalletConnection = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          setAccount(accounts[0]);
+          await initContracts(accounts[0]);
+          setIsConnected(true);
+        }
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const network = await provider.getNetwork();
+        setNetwork(network.name);
+      } catch (error) {
+        console.error('Error checking wallet connection:', error);
+      }
+    }
+  };
 
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
+        setIsLoading(true);
         const accounts = await window.ethereum.request({ 
           method: 'eth_requestAccounts' 
         });
         setAccount(accounts[0]);
+        await initContracts(accounts[0]);
         setIsConnected(true);
         
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -28,10 +63,29 @@ function App() {
         
       } catch (error) {
         console.error('Error connecting wallet:', error);
-        alert('Error connecting wallet.');
+        alert('Error connecting wallet. Please make sure MetaMask is installed and unlocked.');
+      } finally {
+        setIsLoading(false);
       }
     } else {
-      alert('Please install MetaMask!');
+      alert('Please install MetaMask to use this dApp!');
+    }
+  };
+
+  const initContracts = async (account) => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      const creditScoring = new ethers.Contract(CREDIT_SCORING_ADDRESS, CREDIT_SCORING_ABI, signer);
+      const marketplace = new ethers.Contract(MARKETPLACE_ADDRESS, MARKETPLACE_ABI, signer);
+      
+      setCreditContract(creditScoring);
+      setMarketplaceContract(marketplace);
+
+      console.log('Contracts initialized');
+    } catch (error) {
+      console.error('Error initializing contracts:', error);
     }
   };
 
@@ -44,49 +98,158 @@ function App() {
         });
         setNetwork('sepolia');
       } catch (error) {
+        if (error.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [
+                {
+                  chainId: '0xaa36a7',
+                  chainName: 'Sepolia Test Network',
+                  rpcUrls: ['https://sepolia.infura.io/v3/'],
+                  nativeCurrency: {
+                    name: 'Sepolia ETH',
+                    symbol: 'sepETH',
+                    decimals: 18,
+                  },
+                  blockExplorerUrls: ['https://sepolia.etherscan.io'],
+                },
+              ],
+            });
+            setNetwork('sepolia');
+          } catch (addError) {
+            console.error('Error adding network:', addError);
+            alert('Error adding Sepolia network. Please add it manually in MetaMask.');
+          }
+        }
         console.error('Error switching network:', error);
       }
     }
   };
 
   return (
-    <div className="App">
-      <Header 
-        account={account} 
-        connectWallet={connectWallet}
-        userType={userType}
-        setUserType={setUserType}
-        isConnected={isConnected}
-        switchNetwork={switchNetwork}
-        network={network}
-        appName={APP_NAME}
-      />
-      
-      <main className="main-content">
-        {!isConnected ? (
-          <div className="dashboard welcome-dashboard">
-            <div className="welcome-content">
-              <h1>Welcome to {APP_NAME}</h1>
-              <p>Connect your wallet to get started with confidential credit scoring.</p>
-              <button onClick={connectWallet} className="connect-btn large">
-                🦊 Connect MetaMask
-              </button>
+    <Router>
+      <div className="App">
+        <Header 
+          account={account} 
+          connectWallet={connectWallet}
+          userType={userType}
+          setUserType={setUserType}
+          isConnected={isConnected}
+          switchNetwork={switchNetwork}
+          network={network}
+          appName={APP_NAME}
+        />
+        
+        <main className="main-content">
+          {!isConnected ? (
+            <div className="dashboard welcome-dashboard">
+              <div className="welcome-content">
+                <h1>Welcome to {APP_NAME}</h1>
+                <p className="welcome-subtitle">
+                  {APP_DESCRIPTION}
+                </p>
+                
+                <div className="feature-grid">
+                  <div className="feature-card">
+                    <div className="feature-icon">🔒</div>
+                    <h3>Complete Privacy</h3>
+                    <p>Your financial data is encrypted and never exposed to anyone</p>
+                  </div>
+                  
+                  <div className="feature-card">
+                    <div className="feature-icon">⚡</div>
+                    <h3>Instant Verification</h3>
+                    <p>Lenders can check qualifications without seeing your data</p>
+                  </div>
+                  
+                  <div className="feature-card">
+                    <div className="feature-icon">🌐</div>
+                    <h3>Decentralized</h3>
+                    <p>Built on blockchain for transparency and security</p>
+                  </div>
+                  
+                  <div className="feature-card">
+                    <div className="feature-icon">💸</div>
+                    <h3>Loan Marketplace</h3>
+                    <p>Access multiple loan offers with your confidential score</p>
+                  </div>
+                </div>
+
+                <div className="connection-section">
+                  <button 
+                    onClick={connectWallet} 
+                    className="connect-btn large"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Connecting...' : '🦊 Connect MetaMask'}
+                  </button>
+                  <button onClick={switchNetwork} className="network-btn">
+                    🌐 Switch to Sepolia
+                  </button>
+                  <p className="network-info">
+                    {network ? `Currently on: ${network}` : 'Please connect to Sepolia Test Network'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {network !== 'sepolia' && (
+                <div className="network-warning">
+                  <div className="warning-content">
+                    <span className="warning-icon">⚠️</span>
+                    <div className="warning-text">
+                      <h4>Wrong Network Detected</h4>
+                      <p>Please switch to Sepolia Test Network to use {APP_NAME}</p>
+                    </div>
+                    <button onClick={switchNetwork} className="switch-network-btn">
+                      🌐 Switch to Sepolia
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              <Routes>
+                <Route path="/" element={
+                  userType === 'user' ? 
+                    <UserDashboard 
+                      contract={creditContract} 
+                      account={account} 
+                      network={network}
+                    /> :
+                    <LenderDashboard 
+                      contract={creditContract}
+                      marketplaceContract={marketplaceContract}
+                      account={account} 
+                      network={network}
+                    />
+                } />
+                <Route path="/marketplace" element={
+                  <Marketplace 
+                    marketplaceContract={marketplaceContract}
+                    account={account} 
+                  />
+                } />
+              </Routes>
+            </>
+          )}
+        </main>
+
+        <footer className="app-footer">
+          <div className="footer-content">
+            <p>
+              <strong>⚡ {APP_NAME}</strong> - {APP_DESCRIPTION}
+            </p>
+            <div className="footer-links">
+              <a href="https://github.com/Ubuntu1235/fhe-creditguard" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <a href="https://docs.zama.org" target="_blank" rel="noopener noreferrer">Documentation</a>
+              <a href="https://sepolia.etherscan.io" target="_blank" rel="noopener noreferrer">Etherscan</a>
             </div>
           </div>
-        ) : (
-          // THIS IS THE FIXED PART - Shows actual dashboards
-          userType === 'user' ? 
-            <UserDashboard account={account} network={network} /> :
-            <LenderDashboard account={account} network={network} />
-        )}
-      </main>
-
-      <footer className="app-footer">
-        <div className="footer-content">
-          <p><strong>⚡ FHE CreditGuard</strong> - Confidential Credit Scoring</p>
-        </div>
-      </footer>
-    </div>
+        </footer>
+      </div>
+    </Router>
   );
 }
 
