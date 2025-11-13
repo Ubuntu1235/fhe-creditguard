@@ -231,6 +231,15 @@ function App() {
                     account={account} 
                   />
                 } />
+                <Route path="*" element={
+                  <div className="dashboard">
+                    <h2>Page Not Found</h2>
+                    <p>The page you're looking for doesn't exist.</p>
+                    <button onClick={() => window.location.href = '/'}>
+                      Go Home
+                    </button>
+                  </div>
+                } />
               </Routes>
             </>
           )}
