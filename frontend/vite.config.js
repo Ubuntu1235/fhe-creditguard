@@ -16,11 +16,8 @@ export default defineConfig({
   define: {
     'process.env': {}
   },
-  base: './',
+  base: '/',
   optimizeDeps: {
     include: ['react', 'react-dom', 'ethers']
-  },
-  esbuild: {
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 })
