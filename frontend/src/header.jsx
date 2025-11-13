@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ethers } from 'ethers';
-import Header from './components/Header';
+import Header from './components/header';
 import UserDashboard from './components/UserDashboard';
 import LenderDashboard from './components/LenderDashboard';
 import Marketplace from './components/Marketplace';
@@ -332,7 +332,7 @@ function App() {
               </a>
             </p>
             <div className="footer-links">
-              <a href="https://github.com/your-repo" target="_blank" rel="noopener noreferrer">GitHub</a>
+              <a href="https://github.com/Ubuntu1235/fhe-creditguard" target="_blank" rel="noopener noreferrer">GitHub</a>
               <a href="https://docs.zama.org" target="_blank" rel="noopener noreferrer">Documentation</a>
               <a href="https://sepolia.etherscan.io" target="_blank" rel="noopener noreferrer">Etherscan</a>
             </div>
