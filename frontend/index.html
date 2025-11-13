@@ -5,6 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FHE CreditGuard - Confidential Credit Scoring</title>
+    <script type="module">
+      // Simple loading screen management
+      window.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded, waiting for React...');
+      });
+    </script>
     <style>
       /* Basic reset and loading styles */
       * {
@@ -17,6 +23,7 @@
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
         background: #0a0a0a;
         color: white;
+        overflow-x: hidden;
       }
       
       #root {
@@ -24,7 +31,7 @@
       }
       
       /* Loading screen */
-      .initial-loading {
+      #initial-loading {
         display: flex;
         justify-content: center;
         align-items: center;
@@ -32,6 +39,12 @@
         background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
         flex-direction: column;
         gap: 1rem;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 9999;
       }
       
       .loading-spinner {
@@ -47,15 +60,53 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
+      
+      .hidden {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
-    <div id="root">
-      <div class="initial-loading">
-        <div class="loading-spinner"></div>
-        <p>Loading FHE CreditGuard...</p>
-      </div>
+    <div id="initial-loading">
+      <div class="loading-spinner"></div>
+      <p>Loading FHE CreditGuard...</p>
     </div>
-    <script type="module" src="/src/main.jsx"></script>
+    
+    <div id="root"></div>
+    
+    <script type="module">
+      import('./src/main.jsx')
+        .then(() => {
+          console.log('✅ React app loaded successfully');
+          // Hide loading screen after a short delay to ensure React has rendered
+          setTimeout(() => {
+            const loading = document.getElementById('initial-loading');
+            if (loading) {
+              loading.classList.add('hidden');
+            }
+          }, 100);
+        })
+        .catch(error => {
+          console.error('❌ Failed to load React app:', error);
+          const loading = document.getElementById('initial-loading');
+          if (loading) {
+            loading.innerHTML = `
+              <div style="text-align: center;">
+                <h2 style="color: #ff6b6b;">Failed to Load Application</h2>
+                <p>Please check the console for errors.</p>
+                <button onclick="window.location.reload()" style="
+                  background: #FFD700;
+                  color: #000;
+                  border: none;
+                  padding: 10px 20px;
+                  border-radius: 5px;
+                  cursor: pointer;
+                  margin-top: 1rem;
+                ">Retry</button>
+              </div>
+            `;
+          }
+        });
+    </script>
   </body>
 </html>
