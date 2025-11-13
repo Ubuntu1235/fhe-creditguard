@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ account, connectWallet, userType, setUserType, isConnected, switchNetwork }) => {
+const Header = ({ account, connectWallet, userType, setUserType, isConnected, switchNetwork, appName }) => {
   const shortenAddress = (addr) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };
@@ -8,7 +8,7 @@ const Header = ({ account, connectWallet, userType, setUserType, isConnected, sw
   return (
     <header className="header">
       <div className="logo-section">
-        <h1>⚡ FHE CreditGuard</h1>
+        <h1>⚡ {appName}</h1>
         <p>Confidential Credit Scoring on Blockchain</p>
       </div>
       
