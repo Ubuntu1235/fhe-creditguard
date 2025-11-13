@@ -285,7 +285,7 @@ function App() {
                 </div>
               )}
               
-              {/* THIS IS THE KEY PART - Shows actual dashboards instead of success message */}
+              {/* CRITICAL FIX: This shows the actual dashboards */}
               {userType === 'user' ? 
                 <UserDashboard 
                   contract={creditContract} 
