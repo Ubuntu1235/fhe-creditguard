@@ -16,8 +16,5 @@ export default defineConfig({
   define: {
     'process.env': {}
   },
-  base: '/',
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'ethers']
-  }
+  base: './'
 })
