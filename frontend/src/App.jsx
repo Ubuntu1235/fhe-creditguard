@@ -285,37 +285,20 @@ function App() {
                 </div>
               )}
               
-              <Routes>
-                <Route path="/" element={
-                  userType === 'user' ? 
-                    <UserDashboard 
-                      contract={creditContract} 
-                      account={account} 
-                      network={network}
-                    /> :
-                    <LenderDashboard 
-                      contract={creditContract}
-                      marketplaceContract={marketplaceContract}
-                      account={account} 
-                      network={network}
-                    />
-                } />
-                <Route path="/marketplace" element={
-                  <Marketplace 
-                    marketplaceContract={marketplaceContract}
-                    account={account} 
-                  />
-                } />
-                <Route path="*" element={
-                  <div className="dashboard">
-                    <h2>Page Not Found</h2>
-                    <p>The page you're looking for doesn't exist.</p>
-                    <button onClick={() => window.location.href = '/'}>
-                      Go Home
-                    </button>
-                  </div>
-                } />
-              </Routes>
+              {/* THIS IS THE KEY PART - Shows actual dashboards instead of success message */}
+              {userType === 'user' ? 
+                <UserDashboard 
+                  contract={creditContract} 
+                  account={account} 
+                  network={network}
+                /> :
+                <LenderDashboard 
+                  contract={creditContract}
+                  marketplaceContract={marketplaceContract}
+                  account={account} 
+                  network={network}
+                />
+              }
             </>
           )}
         </main>
