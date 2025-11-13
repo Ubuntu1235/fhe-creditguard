@@ -19,5 +19,8 @@ export default defineConfig({
   base: './',
   optimizeDeps: {
     include: ['react', 'react-dom', 'ethers']
+  },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   }
 })
