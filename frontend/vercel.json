@@ -1,19 +1,16 @@
 {
   "version": 2,
   "name": "fhe-creditguard",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "VITE_APP_NAME": "FHE CreditGuard",
+    "VITE_APP_DESCRIPTION": "Confidential Credit Scoring Protocol"
+  }
 }
